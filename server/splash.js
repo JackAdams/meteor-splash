@@ -1,8 +1,3 @@
-Buttons = new Mongo.Collection("buttons");
-Cohorts = new Mongo.Collection("cohorts");
-ButtonGroup = new Mongo.Collection("buttonGroup");
-Owners = new Mongo.Collection("owners");
-
 Meteor.startup(function () {
 
 	if (Buttons.find().count() === 0) {

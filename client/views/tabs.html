@@ -17,11 +17,11 @@
 		</ul>
 
 		<div id="Group">
-			{{#masonryContainer columnWidth=115 transitionDuration="0.1s" itemSelector=".splash_button_item" gutter=10 columnWidth=110 rowHeight=60 id="splash_button_container" }}
+			<div class="splash_button_container">
 				{{# each buttons "Group"}}
 					{{> doButtons }}
 				{{/each}} 
-			{{/masonryContainer}}
+			</div>
 		</div>
 
 		<div id="settings">

@@ -1,9 +1,3 @@
-
-Buttons = new Mongo.Collection('buttons');
-Cohorts = new Mongo.Collection("cohorts");
-ButtonGroup = new Mongo.Collection("buttonGroup");
-Owners = new Mongo.Collection("owners");
-
 var jbox_array = [];
 
 Template.tabs.helpers({
@@ -45,49 +39,8 @@ Template.tabs.onRendered(function () {
 		show: { effect: "fade", duration: 300 }
 	});
 
-	self.$("#edit_button").bootstrapSwitch({
-		labelText: 'Edit Mode',
-		onColor: 'success',
-		labelWidth: 100,
-		inverse: true,
-		onSwitchChange: function (event, state) {
-			$containers = self.$('.splash_button_container');
-
-			if (state) {  // edit mode on
-				$.each(jbox_array, function (index, value) {
-					value.disable();
-				});
-				console.log('jboxes diabled');
-
-				// enable drag'n'drop
-				$.each($containers, function (index, value) {
-					var $buttons = $(value).find('.splash_button_item');
-					$buttons.draggable('enable');
-					$buttons.find('.splash_button > a').css('cursor', 'move');  // specificity gets rid of a:-webkit-any-link definition
-					$splash_button_texts = $buttons.find('.splash_button_text');
-					$splash_button_texts.css('cursor', 'text');
-					$splash_button_texts.addClass('editable');
-					$buttons.find('.splash_button_text');
-				});
-			} else {      // edit mode off
-				$.each(jbox_array, function (index, value) {
-					value.enable();
-				});
-				console.log('jboxes enabled');
-				$.each($containers, function (index, value) {
-					var $buttons = $(value).find('.splash_button_item');
-					$buttons.draggable('disable');
-					$buttons.find('.splash_button > a').css('cursor', 'pointer');
-					$splash_button_texts = $buttons.find('.splash_button_text');
-					$splash_button_texts.removeClass('editable');
-					$splash_button_texts.css('cursor', 'pointer');
-				});
-
-
-			}
-
-		}
-	});
+	
+	
 	// $("input[name=icon_size]:radio").change(function () {
 	//   var value = $(this).val();
 	//   if ( value == '+1' ) {
@@ -124,7 +77,94 @@ Template.tabs.onRendered(function () {
 	//       });
 	// });
 
+  self.$("#edit_button").bootstrapSwitch({
+	  labelText: 'Edit Mode',
+	  onColor: 'success',	
+	  labelWidth: 100,
+	  inverse: true,
+	  onSwitchChange: function (event, state) {
+		  $containers = self.$('.splash_button_container');
 
+		  if (state) {  // edit mode on
+
+		  	  // disable jboxes
+			  $.each(jbox_array, function (index, value) {
+				  value.disable();
+			  });
+
+			  // enable drag'n'drop
+			  $.each($containers, function (index, value) {
+				  var $buttons = $(value).find('.splash_button_item');
+			  	  $(value).packery('bindUIDraggableEvents', $buttons);
+				  $buttons.draggable('enable');
+				  $buttons.find('.splash_button > a').css('cursor', 'move');  // specificity gets rid of a:-webkit-any-link definition
+				  $splash_button_texts = $buttons.find('.splash_button_text');
+				  $splash_button_texts.css('cursor', 'text');
+				  $splash_button_texts.addClass('editable');
+			  });
+		  } else {      // edit mode off
+			  // jboxes enabled
+			  $.each(jbox_array, function (index, value) {
+				  value.enable();
+			  });
+
+			  $.each($containers, function (index, value) {
+				  var $buttons = $(value).find('.splash_button_item');
+				  $buttons.draggable('disable');
+				  $buttons.find('.splash_button > a').css('cursor', 'pointer');
+				  $splash_button_texts = $buttons.find('.splash_button_text');
+				  $splash_button_texts.removeClass('editable');
+				  $splash_button_texts.css('cursor', 'pointer');
+			  });
+
+
+		  }
+
+	  }
+  });
+  
+  this.subscribe("buttons", function() {
+  	console.log('subscribe buttons');
+	// This is a callback that is fired once the subscription to "buttons" is ready (i.e. the buttons data is downloaded)
+
+	$containers = self.$('.splash_button_container')
+	$containers.packery({
+		isInitLayout: true,
+		itemsSelector: self.$('.splash_button_item'),
+		rowHeight: 110,
+		gutter: 5,
+	});
+
+	$containers.packery('once', 'layoutComplete', function(loadedItems) {
+		console.log('once');
+		self.$('.splash_button_item').draggable();
+		
+	    self.$('.splash_button_item').each(function (buttonIndex) {
+	    	$thisButton = $(this);
+	    	var jbox = $thisButton.jBox('Tooltip', {
+		        position: {
+		            y: 'top',
+		        },
+		        outside: 'x',
+		        title: $('#splash_button_title_'+buttonIndex),
+		        closeOnMouseleave:true,
+		        content: $('#splash_button_submenu_' + buttonIndex),
+		        attach: $thisButton
+		    });
+		    jbox_array.push(jbox);
+	    });
+
+		self.$('.splash_button_item').draggable('disable');
+	 });
+
+	$containers.packery();   // makes everything initialize
+
+
+	// self.$('#splash_button_container').isotope({
+	//   itemSelector: '.splash_button_item',
+	//   layoutMode: 'fitRows'
+	// });
+  });
 
 });   // end Template.tabs.onRendered
 
@@ -174,6 +214,4 @@ Template.doButtons.events({
 	},
 });
 
-
-
-
+// columnWidth=115 transitionDuration="0.1s" itemSelector=".splash_button_item" gutter=10 columnWidth=110 rowHeight=60 id="splash_button_container"
